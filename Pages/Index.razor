@@ -1,0 +1,106 @@
+﻿@page "/"
+@inject IJSRuntime Jsx
+@inject NavigationManager Nav
+
+<PageTitle>intento</PageTitle>
+
+<div class="text-center">
+<h3>Factura</h3>
+</div>
+
+
+<EditForm Model="intento" OnValidSubmit="EnviarDatos">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+     <div class="form-group">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" class="form-control" @bind="intento.Fecha" />
+        <ValidationMessage For="@(() => intento.Fecha)" />
+    </div>
+
+    <div class="form-group">
+        <label for="codigoCliente">Código del Cliente:</label>
+        <input type="text" id="codigoCliente" class="form-control" @bind="intento.CodigoCliente" />
+        <ValidationMessage For="@(() => intento.CodigoCliente)" />
+    </div>
+
+    <div class="form-group">
+        <label for="nombreCliente">Nombre del Cliente:</label>
+        <input type="text" id="nombreCliente" class="form-control" @bind="intento.NombreCliente" />
+        <ValidationMessage For="@(() => intento.NombreCliente)" />
+    </div>
+
+    <div class="form-group">
+        <label for="articulos">Artículos:</label>
+        <div>
+            @foreach (var articulo in intento.Articulos)
+            {
+                <div class="articulo">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" class="form-control" @bind="articulo.Nombre" />
+
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" class="form-control" @bind="articulo.Cantidad" />
+
+                    <label for="precio">Precio:</label>
+                    <input type="number" class="form-control" @bind="articulo.Precio" />
+
+                    <label for="total">Total:</label>
+                    <input type="text" class="form-control" value="@articulo.Total" disabled />
+
+                    <br />
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label for="totalPagar">Total a Pagar:</label>
+        <input type="text" id="totalPagar" class="form-control" @bind="intento.TotalPagar" />
+        <ValidationMessage For="@(() => intento.TotalPagar)" />
+    </div>
+
+    <div class="form-group">
+        <label for="comentario">Comentario:</label>
+        <input type="text" id="comentario" class="form-control" @bind="intento.Comentario" />
+        <ValidationMessage For="@(() => intento.Comentario)" />
+    </div>
+
+    <br>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+
+</EditForm>
+
+
+@code{
+
+    Factura intento = new Factura();
+    List<string> errores = new List<string>();
+
+
+    void EnviarDatos(){
+
+        intento.Id = Guid.NewGuid().ToString();
+        var datos = Newtonsoft.Json.JsonConvert.SerializeObject(intento);
+
+
+        //verificar carpeta existente
+        if(!Directory.Exists("datax"))
+        {
+            Directory.CreateDirectory("datax");
+        }
+
+        //guardar el archivo
+        File.WriteAllText($"datax/{intento.Id}.json", datos);
+        
+        Jsx.InvokeVoidAsync("alert", "Se envio el formulario");
+
+        //force to reload
+        Nav.NavigateTo("/", true);
+    }
+
+}
